@@ -3,6 +3,7 @@ package com.example.security1.config.auth;
 import com.example.security1.model.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -20,6 +21,7 @@ import java.util.Map;
 // 즉, Security Session 안에 Authentication객체. Authentication 안에 UserDetails 타입 객체인 User 정보가 저장된다.
 
 @Getter
+@ToString
 public class PrincipalDetails implements UserDetails, OAuth2User {
 
     private User user; //콤포지션

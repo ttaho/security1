@@ -1,6 +1,9 @@
 package com.example.security1.config.oauth;
 
 import com.example.security1.config.auth.PrincipalDetails;
+import com.example.security1.config.oauth.provider.GoogleUserInfo;
+import com.example.security1.config.oauth.provider.NaverUserInfo;
+import com.example.security1.config.oauth.provider.OAuth2UserInfo;
 import com.example.security1.model.User;
 import com.example.security1.repository.UserRepository;
 import lombok.NoArgsConstructor;
@@ -12,6 +15,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -34,11 +39,20 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
         System.out.println("getAttributes : " + oAuth2User.getAttributes());
 
-        String provider = userRequest.getClientRegistration().getRegistrationId();
-        String providerId = oAuth2User.getAttribute("sub");
+        OAuth2UserInfo oAuth2UserInfo = null; // 구글, 네이버 마다 다르게 처리
+        if(userRequest.getClientRegistration().getRegistrationId().equals("google")){
+            System.out.println("구글 로그인 요청");
+            oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
+        }else if(userRequest.getClientRegistration().getRegistrationId().equals("naver")){
+            System.out.println("네이버 로그인 요청");
+            oAuth2UserInfo = new NaverUserInfo((Map) oAuth2User.getAttributes().get("response"));
+        }
+
+        String provider = oAuth2UserInfo.getProvider();
+        String providerId = oAuth2UserInfo.getProviderId();
         String username = provider + "_" + providerId; // google_107157108223565402072
         String password = bCryptPasswordEncoder.encode("1234");
-        String email = oAuth2User.getAttribute("email");
+        String email = oAuth2UserInfo.getEmail();
         String role = "ROLE_USER";
 
         User user = userRepository.findByUsername(username);
